@@ -1,0 +1,29 @@
+node('master') 
+{
+stage('ContinousDownload')
+    {
+    git 'https://github.com/intelliqittrainings/maven.git'
+    } 
+stage('ContinousBuild')
+    {
+    sh label:'', script: 'mvn package'
+    }
+stage('ContinousDeployment')
+# QA server Private IP & need to give write permission for  /var/lib/tomcat8 follow this cmd: chmod o+w -R /var/lib/tomat8   
+ {
+    sh label:'', script: 'scp  /home/ubuntu/.jenkins/workspace/scrpitedpipeline/webapp/target/webapp.war    ubuntu@172.31.8.55:/var/lib/tomcat8/webapps/testapp.war'        
+    }
+stage('ContinousTesting')
+    {
+    git 'https://github.com/intelliqittrainings/FunctionalTesting.git'    
+    sh label: '', script: 'java -jar /home/ubuntu/.jenkins/workspace/scrpitedpipeline/testing.jar'
+    }
+stage('ContinousDelivery')
+#prod server private ip & need to give write permission for  /var/lib/tomcat8 follow this cmd: chmod o+w -R /var/lib/tomat8
+ {
+    sh label:'', script: 'scp  /home/ubuntu/.jenkins/workspace/scrpitedpipeline/webapp/target/webapp.war    ubuntu@172.31.9.253:/var/lib/tomcat8/webapps/prodapp.war'
+    }
+    
+}
+
+
